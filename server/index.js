@@ -14,14 +14,15 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-app.get('/deaths', async (req, res) => {
+app.get('/data', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT SUM(total_deaths)::int AS total_deaths
-       FROM coviddeaths
-       WHERE location = 'Bosnia and Herzegovina';`
+      `SELECT DISTINCT cty FROM election_results_2024_president 
+      where cty IS NOT null LIMIT 1;`
     );
-    res.json({ total: result.rows[0].total_deaths });
+    console.log(result.rows[0]);
+
+    res.json({ total: result.rows[0].cty });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Query failed' });
