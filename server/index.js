@@ -26,6 +26,23 @@ app.get('/data', async (req, res) => {
   }
 });
 
+app.get('/votes-by-town', async (req, res) => {
+    try {
+      const result = await pool.query(`
+      SELECT 
+  TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', '')) AS municipality,
+  SUM(democratic) AS democrat_votes
+FROM election_results_2024_president
+WHERE municipality IS NOT NULL
+GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
+      `);
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch data' });
+    }
+  });
+
 app.listen(5000, () => {
   console.log('Server running on http://localhost:5000');
 });
