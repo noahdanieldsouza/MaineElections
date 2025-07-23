@@ -9,7 +9,7 @@ function App() {
     try {
       console.log(deaths)
       const res = await axios.get('http://localhost:5000/data');
-      setDeaths(res.data.total);
+      setDeaths(res.data);
     } catch (err) {
       console.error(err);
       setDeaths('Error');

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 require('dotenv').config();
+const { getTotalDeaths } = require('./db/queries');
 
 const app = express();
 app.use(cors());
@@ -16,13 +17,9 @@ const pool = new Pool({
 
 app.get('/data', async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT DISTINCT cty FROM election_results_2024_president 
-      where cty IS NOT null LIMIT 1;`
-    );
-    console.log(result.rows[0]);
-
-    res.json({ total: result.rows[0].cty });
+    const cty = await getTotalDeaths();
+    console.log(cty)
+    res.json(cty );
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Query failed' });
