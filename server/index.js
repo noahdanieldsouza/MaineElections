@@ -31,11 +31,14 @@ app.get('/votes-by-town', async (req, res) => {
       const result = await pool.query(`
       SELECT 
   TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', '')) AS municipality,
-  SUM(democratic) AS democrat_votes
+  SUM(democratic) AS democrat_votes,
+  SUM(republican) AS republican_votes,
+  SUM(tbc) - SUM(republican) - SUM(democratic) AS other
 FROM election_results_2024_president
 WHERE municipality IS NOT NULL
 GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
       `);
+      console.log(result.rows)
       res.json(result.rows);
     } catch (err) {
       console.error(err);
