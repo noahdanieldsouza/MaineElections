@@ -1,6 +1,7 @@
 import React, {  useState } from 'react';
 import Pres2024 from './data_views/2024_president';
 import Sen2024 from './data_views/2024_senate';
+import StateSen2024 from './data_views/2024_statesenate';
 import 'leaflet/dist/leaflet.css';
 
 
@@ -29,14 +30,15 @@ const App = () => {
       onChange={(e) => setSelectedOption(e.target.value)}
     >
       <option value="2024 President">2024 President</option>
-      <option value="2024 Senate">2024 Senate</option>
-      <option value="2020 President">2020 President</option>
+      <option value="2024 US Senate">2024 Senate</option>
+      <option value="2024 State Senate">2024 State Senate</option>
     </select>
   </div>
 </div>
 
 {selectedOption === "2024 President" ? <Pres2024 />:
-selectedOption === "2024 Senate"? <Sen2024 /> : null}
+selectedOption === "2024 US Senate"? <Sen2024 /> : 
+selectedOption === "2024 State Senate"? <StateSen2024 /> :null}
 </>
   )
   
