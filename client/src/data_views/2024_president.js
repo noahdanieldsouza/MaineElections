@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import axios from 'axios';
+import RollingList from '../rolling_list';
 import stringSimilarity from 'string-similarity';
 import 'leaflet/dist/leaflet.css';
 
-const Pres2024 = () => {
+const Pres2024 = ({filter}) => {
 
 
   const [geoData, setGeoData] = useState(null);
@@ -26,6 +27,7 @@ const Pres2024 = () => {
           voteMap[key] = {"democrat" : Number(row.democrat_votes) || 0, "republican": Number(row.republican_votes), "other": Number(row.other)};
         });
         setVotes(voteMap);
+        console.log(votes)
         setVoteKeys(Object.keys(voteMap)); // store keys for fuzzy matching
       });
   }, []);
@@ -97,12 +99,13 @@ const Pres2024 = () => {
   };
 
   return geoData ? (
-    
-    <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: "100vh", width: "100%" }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <GeoJSON data={geoData} onEachFeature={onEachFeature} />
-    </MapContainer>
-   
+    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
+      <RollingList voteData={votes} filter = {filter} />
+      <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: "100%", width: "100%" }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <GeoJSON data={geoData} onEachFeature={onEachFeature} />
+      </MapContainer>
+    </div>
   ) : (
     <div>Loading...</div>
   );

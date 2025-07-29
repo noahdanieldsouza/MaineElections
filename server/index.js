@@ -35,7 +35,7 @@ app.get('/2024-pres', async (req, res) => {
   SUM(republican) AS republican_votes,
   SUM(tbc) - SUM(republican) - SUM(democratic) AS other
 FROM election_results_2024_president
-WHERE municipality IS NOT NULL
+WHERE municipality IS NOT NULL AND cty IS NOT NULL
 GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
       `);
       console.log(result.rows)
@@ -55,7 +55,8 @@ GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
   SUM(republican) AS republican_votes,
   SUM(tbc) - SUM(republican) - SUM(democratic) AS other
 FROM election_results_2024_sen
-WHERE municipality IS NOT NULL
+WHERE municipality IS NOT NULL AND cty IS NOT NULL
+
 GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
       `);
       console.log(result.rows)
@@ -75,7 +76,7 @@ GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
   SUM(republican) AS republican_votes,
   SUM(tbc) - SUM(republican) - SUM(democratic) AS other
 FROM election_results_2024_statesen
-WHERE municipality IS NOT NULL
+WHERE municipality IS NOT NULL AND cty IS NOT NULL
 GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
       `);
       console.log(result.rows)

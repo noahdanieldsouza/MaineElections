@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import axios from 'axios';
 import stringSimilarity from 'string-similarity';
+import RollingList from '../rolling_list';
 import 'leaflet/dist/leaflet.css';
 
-const Sen2024 = () => {
+const Sen2024 = ({filter}) => {
 
 
   const [geoData, setGeoData] = useState(null);
@@ -97,11 +98,13 @@ const Sen2024 = () => {
   };
 
   return geoData ? (
-    
+    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
+      <RollingList voteData={votes} filter = {filter}/>
     <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: "100vh", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <GeoJSON data={geoData} onEachFeature={onEachFeature} />
     </MapContainer>
+    </div>
    
   ) : (
     <div>Loading...</div>
