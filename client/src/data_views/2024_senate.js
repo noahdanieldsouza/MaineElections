@@ -19,7 +19,7 @@ const Sen2024 = ({filter}) => {
       .then(setGeoData);
 
     // Load votes per municipality
-    axios.get('http://localhost:5000/2024-sen')
+    axios.get('http://localhost:5000/2024/sen')
       .then(res => {
         const voteMap = {};
         res.data.forEach(row => {
