@@ -39,6 +39,46 @@ GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
   }
 });
 
+app.get('/:yearFrom/:typeFrom/:comparison/:yearTo/:typeTo', async (req, res) => {
+  const { yearFrom, typeFrom, comparison, yearTo, typeTo } = req.params;
+
+
+
+const tableNameFrom = `election_results_${yearFrom}_${typeFrom.toLowerCase()}`;
+const tableNameTo = `election_results_${yearTo}_${typeTo.toLowerCase()}`;
+
+console.log(`
+FROM ${tableNameFrom} f
+JOIN ${tableNameTo} t
+`);
+
+  try {
+    const result = await pool.query(`
+    SELECT 
+  TRIM(REPLACE(REPLACE(f.municipality, 'Twp', ''), 'twp', '')) AS municipality,
+  SUM(f.democratic) AS from_democrat_votes,
+  SUM(f.republican) AS from_republican_votes,
+  SUM(t.democratic) AS to_democrat_votes,
+  SUM(t.republican) AS to_republican_votes,
+  SUM(f.tbc) - SUM(f.republican) - SUM(f.democratic) AS from_other,
+  SUM(t.democratic) - SUM(f.democratic) AS dem_difference,
+  SUM(t.republican) - SUM(f.republican) AS rep_difference
+FROM ${tableNameFrom} f
+JOIN ${tableNameTo} t
+  ON t.municipality = f.municipality
+  AND f.cty = t.cty
+WHERE f.municipality IS NOT NULL AND f.cty IS NOT NULL
+GROUP BY TRIM(REPLACE(REPLACE(f.municipality, 'Twp', ''), 'twp', ''));
+
+    `);
+    console.log(result.rows)
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch data' });
+  }
+});
+
 
 app.listen(5000, () => {
   console.log('Server running on http://localhost:5000');

@@ -29,7 +29,7 @@ const RollingList = ({ voteData, filter }) => {
   return (
     <div style={{
       position: 'absolute',
-      top: 70,
+      top: 100,
       left: 20,
       width: '300px',
       maxHeight: '90vh',

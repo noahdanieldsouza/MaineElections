@@ -4,46 +4,43 @@ import axios from 'axios';
 import stringSimilarity from 'string-similarity';
 import RollingList from '../rolling_list';
 import 'leaflet/dist/leaflet.css';
+import { useGeoContext } from '../infastructure/GeoMatchContext';
 
 const Sen2024 = ({filter}) => {
 
 
-  const [geoData, setGeoData] = useState(null);
+
   const [votes, setVotes] = useState({});
   const [voteKeys, setVoteKeys] = useState([]);
 
+
+  const { geoData, computeMatchMap, matchMap, townNames } = useGeoContext();
+
   useEffect(() => {
-    // Load town boundaries (GeoJSON)
-    fetch('/locations_edited.geojson')
-      .then(res => res.json())
-      .then(setGeoData);
-
-    // Load votes per municipality
-    axios.get('http://localhost:5000/2024/sen')
-      .then(res => {
-        const voteMap = {};
-        res.data.forEach(row => {
-          const key = row.municipality?.trim().toLowerCase();
-          voteMap[key] = {"democrat" : Number(row.democrat_votes) || 0, "republican": Number(row.republican_votes), "other": Number(row.other)};
-        });
-        setVotes(voteMap);
-        setVoteKeys(Object.keys(voteMap)); // store keys for fuzzy matching
+    if (!geoData || townNames.length === 0) return;
+  
+    axios.get('http://localhost:5000/2024/sen').then(res => {
+      const voteMap = {};
+      res.data.forEach(row => {
+        const key = row.municipality?.trim().toLowerCase();
+        voteMap[key] = {
+          democrat: Number(row.democrat_votes) || 0,
+          republican: Number(row.republican_votes),
+          other: Number(row.other),
+        };
       });
-  }, []);
+      setVotes(voteMap);
+      computeMatchMap('2024/sen', Object.keys(voteMap)); // uses cache if exists
+    });
+  }, [geoData, townNames]);
+  
 
-  // Use string-similarity to find closest match
-  const findBestMatch = (townName) => {
-    if (!townName || voteKeys.length === 0) return null;
+  
 
-    const lowerName = townName.toLowerCase();
-    const { bestMatch } = stringSimilarity.findBestMatch(lowerName, voteKeys);
 
-    // Confidence threshold
-    return bestMatch.rating > 0.6 ? bestMatch.target : null;
-  };
-
+  
   const getColor = (townName) => {
-    const bestMatch = findBestMatch(townName);
+    const bestMatch = matchMap[townName?.toLowerCase()];
     if (!bestMatch || !votes[bestMatch]) return '#f7f7f7'; // no data
   
     const demVotes = votes[bestMatch].democrat || 0;
@@ -79,7 +76,7 @@ const Sen2024 = ({filter}) => {
       return;
     }
 
-    const bestMatch = findBestMatch(townName);
+    const bestMatch = matchMap[townName?.toLowerCase()];
     const demVotes = bestMatch? votes[bestMatch].democrat: null; 
     const repVotes = bestMatch? votes[bestMatch].republican: null; 
 
@@ -97,18 +94,17 @@ const Sen2024 = ({filter}) => {
     
   };
 
-  return geoData ? (
-    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <RollingList voteData={votes} filter = {filter}/>
-    <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: "100vh", width: "100%" }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <GeoJSON data={geoData} onEachFeature={onEachFeature} />
-    </MapContainer>
-    </div>
-   
-  ) : (
+  return (!geoData || townNames.length === 0 || Object.keys(votes).length === 0 || Object.keys(matchMap).length === 0) ? (
     <div>Loading...</div>
-  );
+  ): (
+    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
+      <RollingList voteData={votes} filter={filter} />
+      <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: '100%', width: '100%' }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <GeoJSON data={geoData} onEachFeature={onEachFeature} />
+      </MapContainer>
+    </div>
+  ) ;
 };
 
 export default Sen2024;
