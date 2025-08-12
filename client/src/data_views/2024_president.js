@@ -6,7 +6,7 @@ import RollingList from '../rolling_list';
 import 'leaflet/dist/leaflet.css';
 import { useGeoContext } from '../infastructure/GeoMatchContext';
 
-const Pres2024 = ({ filter }) => {
+const Pres2024 = ({ filter, type }) => {
   const [votes, setVotes] = useState({});
   const { geoData, computeMatchMap, matchMap, townNames } = useGeoContext();
 
@@ -30,7 +30,7 @@ const Pres2024 = ({ filter }) => {
   
 
   const getColor = (townName) => {
-    console.log('Vote keys:', Object.keys(votes));
+
     const bestMatch = matchMap[townName?.toLowerCase()];
     if (!bestMatch || !votes[bestMatch]) return '#f7f7f7';
 
@@ -76,7 +76,7 @@ const Pres2024 = ({ filter }) => {
     <div>Loading...</div>
   ): (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <RollingList voteData={votes} filter={filter} />
+      <RollingList voteData={votes} filter={filter} type = {type} />
       <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: '100%', width: '100%' }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON data={geoData} onEachFeature={onEachFeature} />

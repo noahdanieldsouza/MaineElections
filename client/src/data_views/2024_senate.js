@@ -6,7 +6,7 @@ import RollingList from '../rolling_list';
 import 'leaflet/dist/leaflet.css';
 import { useGeoContext } from '../infastructure/GeoMatchContext';
 
-const Sen2024 = ({filter}) => {
+const Sen2024 = ({filter, type}) => {
 
 
 
@@ -98,7 +98,7 @@ const Sen2024 = ({filter}) => {
     <div>Loading...</div>
   ): (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <RollingList voteData={votes} filter={filter} />
+      <RollingList voteData={votes} filter={filter} type = {type} />
       <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: '100%', width: '100%' }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON data={geoData} onEachFeature={onEachFeature} />

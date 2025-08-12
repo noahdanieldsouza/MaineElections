@@ -17,6 +17,7 @@ const App = () => {
   const [secondOption, setSecondOption] = useState({ year: null, type: null });
   const [selectedFilter, setSelectedFilter] = useState('close');
   const [dataComparison, setDataComparison] = useState('close');
+  const [selectedType, setSelectedType] = useState()
 
   return (
     <>
@@ -115,6 +116,17 @@ const App = () => {
                 <option value="rep">Rep Leading</option>
               </select>
             </div>
+            <div>
+              <label htmlFor="filter-select-main" style={{ marginRight: '6px' }}>Show as:</label>
+              <select
+                id="filter-select-main"
+                onChange={(e) => setSelectedType(e.target.value)}
+              >
+                <option value="votes">votes</option>
+                <option value="percent">percent</option>
+                
+              </select>
+            </div>
           </div>
         </div>
 
@@ -125,18 +137,19 @@ const App = () => {
     secondOption,
     dataComparison,
     selectedFilter,
+    selectedType
   });
 
-  const mainKey = `${selectedOption.id}-${selectedFilter}`;
-  const comparisonKey = `${selectedOption.id}-${secondOption?.id || 'none'}-${dataComparison}-${selectedFilter}`;
+  const mainKey = `${selectedOption.id}`;
+  const comparisonKey = `${selectedOption.id}-${secondOption?.id || 'none'}-${dataComparison}-${selectedFilter}-${selectedType}`;
 
   if (!secondOption.year || !dataComparison || dataComparison === 'None') {
     if (selectedOption.year === '2024' && selectedOption.type === 'president') {
-      return <Pres2024 key={mainKey} filter={selectedFilter} />;
+      return <Pres2024 key={mainKey} filter={selectedFilter} type = {selectedType} />;
     } else if (selectedOption.year === '2024' && selectedOption.type === 'sen') {
-      return <Sen2024 key={mainKey} filter={selectedFilter} />;
+      return <Sen2024 key={mainKey} filter={selectedFilter} type = {selectedType}/>;
     } else if (selectedOption.year === '2024' && selectedOption.type === 'statesen') {
-      return <StateSen2024 key={mainKey} filter={selectedFilter} />;
+      return <StateSen2024 key={mainKey} filter={selectedFilter}  type = {selectedType}/>;
     } else {
       return null;
     }
@@ -150,6 +163,7 @@ const App = () => {
         fromType={selectedOption.type}
         toYear={secondOption.year}
         toType={secondOption.type}
+        type = {selectedType}
       />
     );
   }

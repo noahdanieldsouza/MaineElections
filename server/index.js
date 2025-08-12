@@ -31,7 +31,7 @@ FROM ${tableName}
 WHERE municipality IS NOT NULL AND cty IS NOT NULL
 GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
     `);
-    console.log(result.rows)
+   
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -62,7 +62,8 @@ JOIN ${tableNameTo} t
   SUM(t.republican) AS to_republican_votes,
   SUM(f.tbc) - SUM(f.republican) - SUM(f.democratic) AS from_other,
   SUM(t.democratic) - SUM(f.democratic) AS dem_difference,
-  SUM(t.republican) - SUM(f.republican) AS rep_difference
+  SUM(t.republican) - SUM(f.republican) AS rep_difference,
+  SUM(t.tbc) - SUM(t.republican) - SUM(t.democratic) AS to_other
 FROM ${tableNameFrom} f
 JOIN ${tableNameTo} t
   ON t.municipality = f.municipality

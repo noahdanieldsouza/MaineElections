@@ -6,7 +6,7 @@ import RollingList from '../rolling_list';
 import 'leaflet/dist/leaflet.css';
 import { useGeoContext } from '../infastructure/GeoMatchContext';
 
-const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType }) => {
+const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType, type }) => {
   const [votes, setVotes] = useState({});
   const { geoData, computeMatchMap, matchMap, townNames } = useGeoContext();
 
@@ -14,19 +14,37 @@ const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType }) 
     if (!geoData || townNames.length === 0) return;
     console.log(filter, comparison, fromYear, fromType, toYear, toType)
     axios.get(`http://localhost:5000/${fromYear}/${fromType}/${comparison}/${toYear}/${toType}`).then(res => {
-      const voteMap = {};
-      res.data.forEach(row => {
-        const key = row.municipality?.trim().toLowerCase();
-        voteMap[key] = {
-          from_democrat: Number(row.from_democrat_votes) || 0,
-          from_republican: Number(row.from_republican_votes),
-          other: Number(row.from_other),
-          to_democrat: Number(row.to_democrat_votes) || 0,
-          to_republican: Number(row.to_republican_votes),
-          dem_difference: Number(row.dem_difference),
-          rep_difference: Number(row.rep_difference)
-        };
-      });
+        const voteMap = {};
+        res.data.forEach(row => {
+          const key = row.municipality?.trim().toLowerCase();
+          const from_dem = Number(row.from_democrat_votes) || 0;
+          const from_rep = Number(row.from_republican_votes) || 0;
+          const from_other = Number(row.from_other) || 0;
+        
+          const to_dem = Number(row.to_democrat_votes) || 0;
+          const to_rep = Number(row.to_republican_votes) || 0;
+          const to_other = Number(row.to_other) || 0;
+        
+
+          const dem_difference = Number(row.dem_difference) || 0;
+          const rep_difference = Number(row.rep_difference) || 0;
+          voteMap[key] = {
+            from_democrat: from_dem,
+            from_republican: from_rep,
+            from_other: from_other,
+        
+            to_democrat: to_dem,
+            to_republican: to_rep,
+            to_other: to_other,
+        
+            dem_difference: dem_difference,  // percent
+            rep_difference: rep_difference,  // percent
+        
+           
+            other_vote_diff: to_other - from_other
+          };
+        });
+        
       setVotes(voteMap);
       computeMatchMap('2024/president', Object.keys(voteMap)); // uses cache if exists
     });
@@ -39,13 +57,14 @@ const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType }) 
     const {
       from_democrat,
       from_republican,
-      other,
+      from_other,
       to_democrat,
-      to_republican
+      to_republican,
+      to_other
     } = votes[bestMatch];
   
-    const from_total = from_democrat + from_republican + other;
-    const to_total = to_democrat + to_republican + other;
+    const from_total = from_democrat + from_republican + from_other;
+    const to_total = to_democrat + to_republican + to_other;
   
     if (from_total === 0 || to_total === 0) return '#f7f7f7';
   
@@ -124,7 +143,8 @@ const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType }) 
     <div>Loading...</div>
   ): (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <RollingList voteData={votes} filter={filter} />
+      <RollingList voteData={votes} filter={filter} type={type} isComparison={true} />
+
       <MapContainer center={[45.25, -69.445]} zoom={7} style={{ height: '100%', width: '100%' }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON data={geoData} onEachFeature={onEachFeature} />
