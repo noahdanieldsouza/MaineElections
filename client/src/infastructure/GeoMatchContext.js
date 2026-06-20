@@ -5,6 +5,9 @@ import stringSimilarity from 'string-similarity';
 const GeoContext = createContext();
 export const useGeoContext = () => useContext(GeoContext);
 
+const GEOJSON_SOURCE = 'https://services1.arcgis.com/RbMX0mRVOFNTdLzd/arcgis/rest/services/Maine_Town_and_Townships_Boundary_Polygons/FeatureServer/0/query';
+const GEOJSON_PAGE_SIZE = 2000;
+
 export const GeoProvider = ({ children }) => {
     const [geoData, setGeoData] = useState(null);
     const [townNames, setTownNames] = useState([]);
@@ -13,8 +16,34 @@ export const GeoProvider = ({ children }) => {
   
     useEffect(() => {
       const load = async () => {
-        const geoRes = await fetch('/locations_edited.geojson');
-        const geo = await geoRes.json();
+        const features = [];
+        let offset = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+          const queryUrl = new URL(GEOJSON_SOURCE);
+          queryUrl.search = new URLSearchParams({
+            where: '1=1',
+            outFields: 'TOWN,GEOCODE',
+            returnGeometry: 'true',
+            f: 'geojson',
+            resultOffset: String(offset),
+            resultRecordCount: String(GEOJSON_PAGE_SIZE),
+          }).toString();
+
+          const geoRes = await fetch(queryUrl.toString());
+          if (!geoRes.ok) {
+            throw new Error(`Failed to load geojson: ${geoRes.status} ${geoRes.statusText}`);
+          }
+
+          const geo = await geoRes.json();
+          features.push(...(geo.features || []));
+
+          hasMore = Boolean(geo.properties?.exceededTransferLimit) && (geo.features || []).length > 0;
+          offset += GEOJSON_PAGE_SIZE;
+        }
+
+        const geo = { type: 'FeatureCollection', features };
         setGeoData(geo);
   
         const names = geo.features
@@ -23,7 +52,9 @@ export const GeoProvider = ({ children }) => {
   
         setTownNames(names);
       };
-      load();
+      load().catch((error) => {
+        console.error('Failed to load Maine boundary GeoJSON:', error);
+      });
     }, []);
   
     const computeMatchMap = (datasetKey, voteKeys) => {

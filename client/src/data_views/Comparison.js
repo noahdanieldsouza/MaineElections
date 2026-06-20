@@ -13,7 +13,7 @@ const Comparison = ({ filter, comparison, fromYear, fromType, toYear, toType, ty
   useEffect(() => {
     if (!geoData || townNames.length === 0) return;
     console.log(filter, comparison, fromYear, fromType, toYear, toType)
-    axios.get(`http://localhost:5000/${fromYear}/${fromType}/${comparison}/${toYear}/${toType}`).then(res => {
+    axios.get(`/${fromYear}/${fromType}/${comparison}/${toYear}/${toType}`).then(res => {
         const voteMap = {};
         res.data.forEach(row => {
           const key = row.municipality?.trim().toLowerCase();

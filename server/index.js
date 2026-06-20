@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { getTotalDeaths } = require('./db/queries');
 
 const app = express();
@@ -35,6 +36,8 @@ GROUP BY TRIM(REPLACE(REPLACE(municipality, 'Twp', ''), 'twp', ''));
     res.json(result.rows);
   } catch (err) {
     console.error(err);
+    console.error(err.message);
+    console.error(err.stack);
     res.status(500).json({ error: 'Failed to fetch data' });
   }
 });
@@ -81,6 +84,8 @@ GROUP BY TRIM(REPLACE(REPLACE(f.municipality, 'Twp', ''), 'twp', ''));
 });
 
 
-app.listen(5000, () => {
-  console.log('Server running on http://localhost:5000');
+const port = process.env.PORT || 5001;
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });

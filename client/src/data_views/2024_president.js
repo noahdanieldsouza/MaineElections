@@ -13,7 +13,7 @@ const Pres2024 = ({ filter, type }) => {
   useEffect(() => {
     if (!geoData || townNames.length === 0) return;
   
-    axios.get('http://localhost:5000/2024/president').then(res => {
+    axios.get('/2024/president').then(res => {
       const voteMap = {};
       res.data.forEach(row => {
         const key = row.municipality?.trim().toLowerCase();
